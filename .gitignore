@@ -1,0 +1,8 @@
+#Runfile
+run
+#Makefile
+Makefile
+#Cmake folders
+/CMakeFiles
+#VSCode specific content
+.vscode
