@@ -2,7 +2,12 @@
 run
 #Makefile
 Makefile
-#Cmake folders
-/CMakeFiles
+
 #VSCode specific content
 .vscode
+
+#Cmake stuff
+cmake-build*
+CMakeCache.txt
+*.cmake
+/CMakeFiles

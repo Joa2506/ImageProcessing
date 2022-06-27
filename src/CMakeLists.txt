@@ -27,9 +27,8 @@ if(CUDA_VERSION_MAJOR GREATER 9)
 
 	set(
 		CUDA_NVCC_FLAGS
-		${CUDA_NVCC_FLAGS}; 
-		#-gencode arch_72,code=sm_72
-		-gencode arch_86,code=sm_86 #Uncomment for 8.6 architectures
+		${CUDA_NVCC_FLAGS}
+		-gencode arch=compute_86,code=sm_86 #Uncomment for 8.6 architectures
 	)
 endif()
 
@@ -40,11 +39,19 @@ include_directories(${CUDA_INCLUDE_DIRS})  #This seems to have added the cuda_ru
 include_directories(${TensorRT_INCLUDE_DIR})
 include_directories(${TensorRT_DIR}/samples/common)
 include_directories(${OpenCV_INCLUDE_DIRS})
-add_executable(run main.cpp Engine.cpp)
+cuda_add_executable(run main.cpp Engine.cpp Engine.cu)
+
 
 #links libraries
-target_link_libraries(run nvonnxparser)
-target_link_libraries(run nvinfer${NVINFER_LIBRARY})
-target_link_libraries(run ${TensorRT_DIR}/samples/common/logger.cpp)
 target_link_libraries(run ${CUDA_LIBRARIES})
 target_link_libraries(run ${OpenCV_LIBS})
+
+# cmake_minimum_required(VERSION 3.10)
+
+# project( imageproc )
+# find_package( OpenCV REQUIRED )
+# find_package(CUDA REQUIRED)
+# set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -gencode arch=compute_86,code=sm_86)
+
+# cuda_add_executable( run main.cpp Engine.cpp Engine.cu)
+# target_link_libraries( run ${OpenCV_LIBS} )

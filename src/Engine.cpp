@@ -1,4 +1,4 @@
-#include <Engine.hpp>
+#include "Engine.h"
 #include <iostream>
 #include <fstream>
 
@@ -8,73 +8,28 @@
 Engine::Engine(const Configurations& config) : mConfig(config) {}
 Engine::~Engine() {}
 
+extern "C" void Hello();
 bool Engine::readFile()
 {
-
-    mImage = cv::imread(mConfig.imageName);
-    if (mImage.empty()) 
+    mImageInput = cv::imread(mConfig.imageName);
+    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC1);
+    if (mImageInput.empty()) 
     {
         std::cout << "Could not open or find the image" << std::endl;
         return false;
     }
 
-    // cv::imshow("image", mImage);
-    // cv::waitKey(0);
+    if(!mImageInput.isContinuous())
+    {
+        return false;
+    }    
     return true; 
 }
-bool Engine::preProcessImage()
-{
 
-    mConfig.height = mImage.size().height;
-    mConfig.width = mImage.size().width;
-    mConfig.channels = mImage.channels();
-    mConfig.size = mImage.size().area();
-    cv::cvtColor(mImage, mImage, cv::COLOR_BGR2RGB);
-    mImage.convertTo(mImage, CV_32FC1);
-    printf("Size of image is %d\n", mImage.size().area());
-
-    // imageBufferCPU = (float*)malloc(mConfig.height*mConfig.width*sizeof(float)*3);
-    // memset(imageBufferCPU, 0, mConfig.height*mConfig.width*sizeof(float)*3);
-
-    imageBufferCPU = (float*)malloc(mConfig.size*sizeof(float));
-    memset(imageBufferCPU, 0, mConfig.size*sizeof(float));
-    //cv::imshow("image", mImage);
-    //cv::waitKey(0);
-
-    //memcpy(imageBufferCPU, (float*)mImage.data, mImage.size().area()*sizeof(float));
-    
-    int i = 0;
-    if(mImage.isContinuous())
-    {
-        imageBufferCPU = (float*)mImage.data;
-    }    
-    printf("Image copied to float buffer\n");
-    fflush(stdout);
-    //for (i = 0; i < mConfig.size; i++)
-    // {
-    //     printf("%f\n", imageBufferCPU[i]);
-    // }
-    
-    gpuErrchk(cudaMalloc(&imageBufferGPU, mConfig.size));
-    gpuErrchk(cudaMemcpy(imageBufferGPU, imageBufferCPU, mConfig.size, cudaMemcpyHostToDevice));
-    printf("Images copied to GPU\n");
-    fflush(stdout);
-
-    return true;
-}
-
-bool Engine::processImage()
-{
-
-    return true;
-}
 
 void Engine::clean()
 {
-    gpuErrchk(cudaFree(imageBufferGPU));
-    free(imageBufferCPU);
     gpuErrchk(cudaDeviceReset());
-
 }
 bool Engine::run()
 {
@@ -82,9 +37,13 @@ bool Engine::run()
     printDevice();
     //Getting files ready
     readFile();
-    preProcessImage();
+    //convertToGray();
+    gaussianBlur();
+    //Hello();
     //Run program
-    
+    cv::imshow("Input",mImageInput);
+	cv::imshow("Output",mImageOutput);
+    cv::waitKey(0);
     //Clean up;
     clean();
 
