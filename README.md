@@ -17,8 +17,8 @@ make
 
 - [x] Use openCV to upload images
 - [x] Convert BGR to Greyscale
-- [x] Gaussian Blur
-- [ ] Brightness
+- [ ] Gaussian Blur
+- [x] Brightness
 - [ ] Edge detection
 
 
