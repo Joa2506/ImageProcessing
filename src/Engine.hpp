@@ -7,15 +7,6 @@
 #include <opencv2/opencv.hpp>
 #include <vector_types.h>
 
-#define gpuErrchk(ans) { gpuAssert((ans),__FILE__, __LINE__);}
-inline void gpuAssert(cudaError_t code, const char * file, int line, bool abort=true)
-{
-    if(code != cudaSuccess)
-    {
-        fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-        if(abort) exit(code);
-    }
-}
 
 struct Configurations {
     std::string imageName;
@@ -36,14 +27,16 @@ class Engine
         cv::Mat mImageOutput;
         //Methods
         bool fileExist(std::string filename);
+        void clean();
+        bool readFile();
+        void printDevice();
 
         //Functions that initiates the CUDA kernel.
         //This function converts a openCV image from BGR to Gray by invoking the bgrToGray CUDA Kernel.
         bool convertToGray();
         bool gaussianBlur();
-        void clean();
-        bool readFile();
-        void printDevice();
+        void brightness(int brightnessLevel);
+
 
         void Hello ();
 
@@ -60,8 +53,3 @@ class Engine
 
 
 };
-
-        //Global cuda functions
-        __global__ void gaussianBlur(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width);
-        __global__ void brightness(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width, int brightness);
-        __global__ void bgrToGray(unsigned char* input, unsigned char* output, int width, int height, int colorStep, int grayStep);

@@ -1,7 +1,7 @@
-#include "Engine.h"
+#include "Engine.hpp"
+#include "utils.hpp"
 #include <iostream>
 #include <fstream>
-
 #include <stdio.h>
 
 
@@ -38,7 +38,8 @@ bool Engine::run()
     //Getting files ready
     readFile();
     //convertToGray();
-    gaussianBlur();
+    //gaussianBlur();
+    brightness(80);
     //Hello();
     //Run program
     cv::imshow("Input",mImageInput);

@@ -39,7 +39,7 @@ include_directories(${CUDA_INCLUDE_DIRS})  #This seems to have added the cuda_ru
 include_directories(${TensorRT_INCLUDE_DIR})
 include_directories(${TensorRT_DIR}/samples/common)
 include_directories(${OpenCV_INCLUDE_DIRS})
-cuda_add_executable(run main.cpp Engine.cpp Engine.cu)
+cuda_add_executable(run main.cpp Engine.cpp Engine.cu ImageProcessing.cu)
 
 
 #links libraries
