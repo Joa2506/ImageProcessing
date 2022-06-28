@@ -9,11 +9,14 @@
 
 
 struct Configurations {
+
+    //Image meta data
     std::string imageName;
     int height;
     int width;
     int channels;
     int size;
+    int step;
 };
 
 class Engine

@@ -2,7 +2,7 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-__global__ void gaussianBlurKernel(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width)
+__global__ void gaussianBlurKernel(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width, unsigned int channel, unsigned int step)
 {
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
     int iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -27,7 +27,7 @@ __global__ void gaussianBlurKernel(unsigned char * input, unsigned char* output,
     
 }
 
-__global__ void brightnessKernel(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width, int brightness, int step)
+__global__ void brightnessKernel(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width, int step, int channels, int brightness)
 {
     const int ix = blockIdx.x * blockDim.x + threadIdx.x;
     const int iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -36,39 +36,22 @@ __global__ void brightnessKernel(unsigned char * input, unsigned char* output, u
     if(ix < width && iy < height)
     {
         //Finding the thread id
-        const int tid = (iy * width + ix);
-
-        for (int i = 0; i < 3; i++)
+        //const int tid = (ix + iy * width) * 3;
+        const int tid = iy * step + (channels * ix);
+        for (int i = 0; i < channels; i++)
         {
-            output[tid + i] = input[tid + i];
+            int pixel = input[tid + i] + brightness;
+            if(pixel > 255)
+            {
+                pixel = 255;
+            }
+            else if(pixel < 0)
+            {
+                pixel = 0;
+            }
+            output[tid + i] = pixel;
         }
 
-        
-        // // //Pixel thread of bgr image
-        // // const unsigned char blue = input[tid];
-        // // const unsigned char green = input[tid + 1];
-        // // const unsigned char red = input[tid + 2];
-
-        // // unsigned int valueR = red + brightness;
-        // // unsigned int valueG  = green + brightness;
-        // // unsigned int valueB = blue + brightness;
-        
-        // for (int i = 0; i < 3; i++)
-        // {
-        //     int newPixel = input[tid + i] + brightness;
-
-        //     if(newPixel > 255)
-        //     {
-        //         newPixel = 255;
-        //     }
-        //     else if(newPixel < 0)
-        //     {
-        //         newPixel = 0;
-        //     }
-
-        //     output[tid + i] = newPixel;
-        // }
-        
     }
     
 

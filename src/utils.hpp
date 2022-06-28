@@ -11,3 +11,8 @@ inline void gpuAssert(cudaError_t code, const char * file, int line, bool abort=
         if(abort) exit(code);
     }
 }
+
+const float gaussMat[7][7] = 
+{
+    
+};

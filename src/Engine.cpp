@@ -4,7 +4,6 @@
 #include <fstream>
 #include <stdio.h>
 
-
 Engine::Engine(const Configurations& config) : mConfig(config) {}
 Engine::~Engine() {}
 
@@ -12,7 +11,16 @@ extern "C" void Hello();
 bool Engine::readFile()
 {
     mImageInput = cv::imread(mConfig.imageName);
-    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC1);
+    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC3);
+
+    mConfig.channels = mImageInput.channels();
+    mConfig.height = mImageInput.rows;
+    mConfig.width = mImageInput.cols;
+    mConfig.size = mImageInput.size().area();
+    mConfig.step = mImageInput.step;
+
+    
+
     if (mImageInput.empty()) 
     {
         std::cout << "Could not open or find the image" << std::endl;
@@ -39,8 +47,7 @@ bool Engine::run()
     readFile();
     //convertToGray();
     //gaussianBlur();
-    brightness(80);
-    //Hello();
+    brightness(-80);
     //Run program
     cv::imshow("Input",mImageInput);
 	cv::imshow("Output",mImageOutput);
