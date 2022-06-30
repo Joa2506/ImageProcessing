@@ -1,10 +1,9 @@
-#include "Engine.hpp"
-#include <ImageProcessing.cuh>
-#include "utils.hpp"
+//#include "Engine.hpp"
+#include "ImageProcessing.cuh"
 bool Engine::convertToGray()
 {
-
-    const int colorBytes = mImageInput.step * mImageInput.rows;
+    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC1);
+    const int colorBytes = mBytes;
 	const int grayBytes = mImageOutput.step * mImageOutput.rows;
 
     unsigned char * d_input, *d_output;
@@ -32,48 +31,18 @@ bool Engine::convertToGray()
     return true;
 }
 
-
-bool Engine::gaussianBlur()
-{
-
-    //Size of image in bytes
-    const int bytes = mConfig.width * mConfig.height * mConfig.channels;
-
-    //Device buffers
-    unsigned char * d_input, *d_output;
-
-    gpuErrchk(cudaMalloc<unsigned char>(&d_input, bytes));
-    gpuErrchk(cudaMalloc<unsigned char>(&d_output, bytes));
-
-    gpuErrchk(cudaMemcpy(d_input, mImageInput.ptr(), bytes, cudaMemcpyHostToDevice));
-    printf("Image uploaded to GPU\n");
-
-    const dim3 block(WIDTH, HEIGHT);
-    //const dim3 grid(mImageInput.cols, mImageInput.rows);
-    const dim3 grid((mConfig.width + block.x -1)/block.x, (mConfig.height + block.y - 1)/block.y);
-    printf("Channels %d\n",mConfig.channels);
-    gaussianBlurKernel <<<grid, block>>>(d_input, d_output, mConfig.height, mConfig.width, mConfig.channels, mConfig.step);
-    gpuErrchk(cudaDeviceSynchronize());
-    gpuErrchk(cudaMemcpy(mImageOutput.ptr(), d_output, bytes, cudaMemcpyDeviceToHost));
-
-    gpuErrchk(cudaFree(d_input));
-    gpuErrchk(cudaFree(d_output));
-
-    return true;
-}
-
 void Engine::brightness(int brightnessLevel)
 {
-    //Size of image in bytes
-    const int bytes = mConfig.width * mConfig.height * mConfig.channels;
+    //Output image of type unsigned char, with three channels
+    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC3);
 
     //Device buffers
     unsigned char * d_input, *d_output;
 
-    gpuErrchk(cudaMalloc<unsigned char>(&d_input, bytes));
-    gpuErrchk(cudaMalloc<unsigned char>(&d_output, bytes));
+    gpuErrchk(cudaMalloc<unsigned char>(&d_input, mBytes));
+    gpuErrchk(cudaMalloc<unsigned char>(&d_output, mBytes));
 
-    gpuErrchk(cudaMemcpy(d_input, mImageInput.ptr(), bytes, cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(d_input, mImageInput.ptr(), mBytes, cudaMemcpyHostToDevice));
     printf("Image uploaded to GPU\n");
 
     const dim3 block(WIDTH, HEIGHT);
@@ -83,10 +52,70 @@ void Engine::brightness(int brightnessLevel)
     brightnessKernel <<<grid, block>>>(d_input, d_output, mConfig.width, mConfig.height, mConfig.step, mConfig.channels, brightnessLevel);
 
     gpuErrchk(cudaDeviceSynchronize());
-    gpuErrchk(cudaMemcpy(mImageOutput.ptr(), d_output, bytes, cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(mImageOutput.ptr(), d_output, mBytes, cudaMemcpyDeviceToHost));
 
     gpuErrchk(cudaFree(d_input));
     gpuErrchk(cudaFree(d_output));
 
 
+}
+
+void Engine::swapPixels(color c1, color c2)
+{
+    //Output image of type unsigned char, with three channels
+    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC3);
+    unsigned char * d_input, *d_output;
+
+    gpuErrchk(cudaMalloc<unsigned char>(&d_input, mBytes));
+    gpuErrchk(cudaMalloc<unsigned char>(&d_output, mBytes));
+
+    gpuErrchk(cudaMemcpy(d_input, mImageInput.ptr(), mBytes, cudaMemcpyHostToDevice));
+
+    const dim3 block(WIDTH, HEIGHT);
+    const dim3 grid((mConfig.width + block.x -1)/block.x, (mConfig.height + block.y - 1)/block.y);
+
+    //Inset swap kernel
+    swapPixelKernel<<<grid, block>>>(d_input, d_output, mConfig.width, mConfig.height, mConfig.step, mConfig.channels, c1, c2);
+
+    gpuErrchk(cudaDeviceSynchronize());
+    gpuErrchk(cudaMemcpy(mImageOutput.ptr(), d_output, mBytes, cudaMemcpyDeviceToHost));
+
+    gpuErrchk(cudaFree(d_input));
+    gpuErrchk(cudaFree(d_output));
+
+
+}
+
+//Kernel convolutions
+void Engine::edgeDetection()
+{
+    
+}
+
+bool Engine::gaussianBlur()
+{
+
+    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC3);
+
+    //Device buffers
+    unsigned char * d_input, *d_output;
+
+    gpuErrchk(cudaMalloc<unsigned char>(&d_input, mBytes));
+    gpuErrchk(cudaMalloc<unsigned char>(&d_output, mBytes));
+
+    gpuErrchk(cudaMemcpy(d_input, mImageInput.ptr(), mBytes, cudaMemcpyHostToDevice));
+    printf("Image uploaded to GPU\n");
+
+    const dim3 block(WIDTH, HEIGHT);
+    //const dim3 grid(mImageInput.cols, mImageInput.rows);
+    const dim3 grid((mConfig.width + block.x -1)/block.x, (mConfig.height + block.y - 1)/block.y);
+    printf("Channels %d\n",mConfig.channels);
+    gaussianBlurKernel <<<grid, block>>>(d_input, d_output, mConfig.height, mConfig.width, mConfig.channels, mConfig.step);
+    gpuErrchk(cudaDeviceSynchronize());
+    gpuErrchk(cudaMemcpy(mImageOutput.ptr(), d_output, mBytes, cudaMemcpyDeviceToHost));
+
+    gpuErrchk(cudaFree(d_input));
+    gpuErrchk(cudaFree(d_output));
+
+    return true;
 }

@@ -1,5 +1,4 @@
 #include "Engine.hpp"
-#include "utils.hpp"
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -8,29 +7,25 @@ Engine::Engine(const Configurations& config) : mConfig(config) {}
 Engine::~Engine() {}
 
 extern "C" void Hello();
-bool Engine::readFile()
+bool Engine::init()
 {
-    mImageInput = cv::imread(mConfig.imageName);
-    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC3);
+
+    if(!fileExists(mConfig.imageName))
+    {
+        std::cout << "Could not find file!" << std::endl;
+        return false;
+    }
 
     mConfig.channels = mImageInput.channels();
     mConfig.height = mImageInput.rows;
     mConfig.width = mImageInput.cols;
-    mConfig.size = mImageInput.size().area();
+    mConfig.size = mConfig.width * mConfig.height;
     mConfig.step = mImageInput.step;
 
-    
+    mBytes = mConfig.size* mConfig.channels * sizeof(unsigned char); //Bytes to allocate.
 
-    if (mImageInput.empty()) 
-    {
-        std::cout << "Could not open or find the image" << std::endl;
-        return false;
-    }
 
-    if(!mImageInput.isContinuous())
-    {
-        return false;
-    }    
+
     return true; 
 }
 
@@ -44,10 +39,11 @@ bool Engine::run()
     //Print device properties
     printDevice();
     //Getting files ready
-    readFile();
+    init();
     //convertToGray();
     //gaussianBlur();
-    brightness(-80);
+    //brightness(-80);
+    swapPixels(BLUE, GREEN);
     //Run program
     cv::imshow("Input",mImageInput);
 	cv::imshow("Output",mImageOutput);
@@ -75,6 +71,24 @@ void Engine::printDevice()
     }
     
 
+}
+
+bool Engine::fileExists(std::string filename)
+{
+    mImageInput = cv::imread(mConfig.imageName);
+    
+
+    if (mImageInput.empty()) 
+    {
+        std::cout << "Could not open or find the image" << std::endl;
+        return false;
+    }
+
+    if(!mImageInput.isContinuous())
+    {
+        return false;
+    }    
+    return true;
 }
 
 

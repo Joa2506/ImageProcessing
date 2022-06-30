@@ -1,7 +1,7 @@
-#include <ImageProcessing.cuh>
+#include "ImageProcessing.cuh"
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-
+#include <math.h>
 __global__ void gaussianBlurKernel(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width, unsigned int channel, unsigned int step)
 {
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -78,5 +78,46 @@ __global__ void bgrToGray(unsigned char* input, unsigned char* output, int width
 
         output[grayTid] = static_cast<unsigned char>(gray);
     }
+
+}
+//Swaps the red and green pixel values
+__global__ void swapPixelKernel(unsigned char * input, unsigned char* output, int width, int height, int step, int channels, color c1, color c2)
+{
+        //2D indexes of current thread
+    const int ix = blockIdx.x * blockDim.x + threadIdx.x;
+    const int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int missingChannel;
+
+    if(channels != 3)
+    {
+        return;
+    }
+
+    missingChannel = abs((c1 + c2)-channels);
+
+    if((ix < width) && (iy < height))
+    {
+        const int tid = iy * step + (channels * ix);
+        
+        int firstPixel = input[tid + c1];
+        int secondPixel = input[tid + c2];
+
+        /*
+        Swapping with XOR. Obviously redundant as I could just have placed the pixels where they needed to go in the ouput array. 
+        A decent solution if swapping elements on the same array to return an altered version.
+        */
+        firstPixel ^= secondPixel;
+        secondPixel ^= firstPixel;
+        firstPixel ^= secondPixel;
+         
+        output[tid + c1] = firstPixel;
+        output[tid + c2] = secondPixel;
+        output[tid + missingChannel] = input[tid + missingChannel];
+
+    }
+}
+
+__global__ void edgeDetectionKernel(unsigned char * input, unsigned char* output, int width, int height, int step, int channels)
+{
 
 }

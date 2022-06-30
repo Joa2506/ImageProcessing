@@ -6,8 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
 #include <vector_types.h>
-
-
+#include "utils.hpp"
 struct Configurations {
 
     //Image meta data
@@ -19,6 +18,8 @@ struct Configurations {
     int step;
 };
 
+
+
 class Engine
 {
     private:
@@ -28,10 +29,11 @@ class Engine
         float * imageBufferGPU;
         cv::Mat mImageInput;
         cv::Mat mImageOutput;
+        int mBytes;
         //Methods
-        bool fileExist(std::string filename);
+        bool fileExists(std::string filename);
         void clean();
-        bool readFile();
+        bool init();
         void printDevice();
 
         //Functions that initiates the CUDA kernel.
@@ -39,7 +41,8 @@ class Engine
         bool convertToGray();
         bool gaussianBlur();
         void brightness(int brightnessLevel);
-
+        void swapPixels(color c1, color c2);
+        void edgeDetection();
 
         void Hello ();
 
