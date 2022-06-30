@@ -41,9 +41,9 @@ bool Engine::run()
     //Getting files ready
     init();
     //convertToGray();
-    //gaussianBlur();
+    gaussianBlur();
     //brightness(-80);
-    swapPixels(BLUE, GREEN);
+    //swapPixels(BLUE, GREEN);
     //Run program
     cv::imshow("Input",mImageInput);
 	cv::imshow("Output",mImageOutput);

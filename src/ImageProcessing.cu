@@ -13,12 +13,12 @@ __global__ void gaussianBlurKernel(unsigned char * input, unsigned char* output,
     int mask[3][3] = {1,2,1, 2,3,2, 1,2,1};
 
     int sum = 0;
-
+    const int tid = iy * step + (channel * ix);
     for (int j = -1; j < 1; ++j)
     {
         for (int i = -1; i < 1; ++i)
         {
-            int color = input[(iy + j) * width + (ix + i)];
+            int color = input[tid];
             sum += color * mask[i + 1][j + 1];
         }
         

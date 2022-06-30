@@ -89,7 +89,7 @@ void Engine::swapPixels(color c1, color c2)
 //Kernel convolutions
 void Engine::edgeDetection()
 {
-    
+
 }
 
 bool Engine::gaussianBlur()
