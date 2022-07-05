@@ -42,7 +42,7 @@ class Engine
         bool gaussianBlur();
         void brightness(int brightnessLevel);
         void swapPixels(color c1, color c2);
-        void edgeDetection();
+        void edgeDetectionSobel();
 
         void Hello ();
 

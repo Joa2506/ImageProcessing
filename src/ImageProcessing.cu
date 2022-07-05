@@ -117,7 +117,19 @@ __global__ void swapPixelKernel(unsigned char * input, unsigned char* output, in
     }
 }
 
-__global__ void edgeDetectionKernel(unsigned char * input, unsigned char* output, int width, int height, int step, int channels)
+__global__ void sobelKernel(unsigned char * input, unsigned char* output, int width, int height, int step)
 {
+    const int col = blockIdx.x * blockDim.x + threadIdx.x;
+    const int row = blockIdx.y * blockDim.y + threadIdx.y;
+
+    
+    int start_r = row - 3/2;
+    int start_c = col - 3/2;
+
+
+    if((col < width) && (row < height))
+    {
+
+    }
 
 }

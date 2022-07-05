@@ -13,4 +13,4 @@ __global__ void bgrToGray(unsigned char* input, unsigned char* output, int width
 //Swaps two pixels values
 __global__ void swapPixelKernel(unsigned char * input, unsigned char* output, int width, int height, int step, int channels, color c1, color c2);
 
-__global__ void edgeDetection(unsigned char * input, unsigned char* output, int width, int height, int step, int channels);
+__global__ void sobelKernel(unsigned char * input, unsigned char* output, int width, int height, int step)

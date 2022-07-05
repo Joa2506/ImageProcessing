@@ -87,9 +87,25 @@ void Engine::swapPixels(color c1, color c2)
 }
 
 //Kernel convolutions
-void Engine::edgeDetection()
+void Engine::edgeDetectionSobel()
 {
+    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC1);
+    const int colorBytes = mBytes;
+	const int grayBytes = mImageOutput.step * mImageOutput.rows;
 
+    unsigned char * d_input, *d_output;
+
+    gpuErrchk(cudaMalloc<unsigned char>(&d_input, colorBytes));
+    gpuErrchk(cudaMalloc<unsigned char>(&d_output, grayBytes));
+    gpuErrchk(cudaMemcpy(d_input, mImageInput.ptr(), colorBytes, cudaMemcpyHostToDevice));
+    printf("Images copied to GPU\n");
+
+    const dim3 block(WIDTH, HEIGHT);
+    const dim3 grid((mImageInput.cols + block.x -1)/block.x, (mImageInput.rows + block.y - 1)/block.y);
+    //First transform to gray
+    bgrToGray <<<grid, block>>>(d_input, d_input, mImageInput.cols, mImageInput.rows, mImageInput.step, mImageOutput.step);
+
+    
 }
 
 bool Engine::gaussianBlur()
