@@ -26,6 +26,7 @@ bool Engine::convertToGray()
     gpuErrchk(cudaFree(d_input));
     gpuErrchk(cudaFree(d_output));
 
+
     fflush(stdout);
 
     return true;
@@ -111,27 +112,38 @@ void Engine::edgeDetectionSobel()
 bool Engine::gaussianBlur()
 {
 
-    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC3);
+    // mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC3);
 
-    //Device buffers
-    unsigned char * d_input, *d_output;
+    // //Device buffers
+    // unsigned char * d_input, *d_output;
 
-    gpuErrchk(cudaMalloc<unsigned char>(&d_input, mBytes));
-    gpuErrchk(cudaMalloc<unsigned char>(&d_output, mBytes));
+    // gpuErrchk(cudaMalloc<unsigned char>(&d_input, mBytes));
+    // gpuErrchk(cudaMalloc<unsigned char>(&d_output, mBytes));
 
-    gpuErrchk(cudaMemcpy(d_input, mImageInput.ptr(), mBytes, cudaMemcpyHostToDevice));
-    printf("Image uploaded to GPU\n");
+    // gpuErrchk(cudaMemcpy(d_input, mImageInput.ptr(), mBytes, cudaMemcpyHostToDevice));
+    // printf("Image uploaded to GPU\n");
+    // gpuErrchk(cudaMemcpyToSymbol(mask, sobelX, MASK_DIM*MASK_DIM*sizeof(int)));
+    // const dim3 block(WIDTH, HEIGHT);
+    // //const dim3 grid(mImageInput.cols, mImageInput.rows);
+    // const dim3 grid((mConfig.width + block.x -1)/block.x, (mConfig.height + block.y - 1)/block.y);
+    // printf("Channels %d\n",mConfig.channels);
+    // gaussianBlurKernel <<<grid, block>>>(d_input, d_output, mConfig.height, mConfig.width, mConfig.channels, mConfig.step);
+    // gpuErrchk(cudaDeviceSynchronize());
+    // gpuErrchk(cudaMemcpy(mImageOutput.ptr(), d_output, mBytes, cudaMemcpyDeviceToHost));
 
-    const dim3 block(WIDTH, HEIGHT);
-    //const dim3 grid(mImageInput.cols, mImageInput.rows);
-    const dim3 grid((mConfig.width + block.x -1)/block.x, (mConfig.height + block.y - 1)/block.y);
-    printf("Channels %d\n",mConfig.channels);
-    gaussianBlurKernel <<<grid, block>>>(d_input, d_output, mConfig.height, mConfig.width, mConfig.channels, mConfig.step);
-    gpuErrchk(cudaDeviceSynchronize());
-    gpuErrchk(cudaMemcpy(mImageOutput.ptr(), d_output, mBytes, cudaMemcpyDeviceToHost));
-
-    gpuErrchk(cudaFree(d_input));
-    gpuErrchk(cudaFree(d_output));
+    // gpuErrchk(cudaFree(d_input));
+    // gpuErrchk(cudaFree(d_output));
 
     return true;
+}
+
+void Engine::convolution()
+{
+    mImageOutput = cv::Mat(mImageInput.rows, mImageInput.cols, CV_8UC3);
+
+    unsigned char * d_input, *d_output;
+
+    //Filer
+    float * mask;
+    
 }

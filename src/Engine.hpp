@@ -43,6 +43,7 @@ class Engine
         void brightness(int brightnessLevel);
         void swapPixels(color c1, color c2);
         void edgeDetectionSobel();
+        void convolution();
 
         void Hello ();
 

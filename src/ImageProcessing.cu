@@ -2,30 +2,38 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <math.h>
-__global__ void gaussianBlurKernel(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width, unsigned int channel, unsigned int step)
-{
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if(iy < 2 || ix < 2 || ix >= width-3 || iy >= height-3)
-        return;
 
-    int mask[3][3] = {1,2,1, 2,3,2, 1,2,1};
 
-    int sum = 0;
-    const int tid = iy * step + (channel * ix);
-    for (int j = -1; j < 1; ++j)
-    {
-        for (int i = -1; i < 1; ++i)
-        {
-            int color = input[tid];
-            sum += color * mask[i + 1][j + 1];
-        }
+// __global__ void gaussianBlurKernel(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width, unsigned int channel, unsigned int step)
+// {
+//     //Calculate the global thread positions
+//     int col = blockIdx.x * blockDim.x + threadIdx.x;
+//     int row = blockIdx.y * blockDim.y + threadIdx.y;
+//     const int tid = row * step + (channel * col);
+//     //Starting index for calculation
+//     int start_r = row - MASK_OFFSET;
+//     int start_c = col - MASK_OFFSET;
+
+//     //Temp to accumulate result
+//     int temp = 0;
+
+//     for (int i = 0; i < MASK_DIM; i++)
+//     {
+//         for (int j = 0; j < MASK_DIM; j++)
+//         {
+//             if((start_r + 1) >= 0 && (start_r + i) < width*height*channel)
+//             {
+//                 if((start_c + j) >= 0 && (start_r + j) < width*height*channel)
+//                 {
+//                     temp += input[(start_r + i)* width*height*channel + (start_c + j)] * mask[i * MASK_DIM + j];
+//                 }
+//             }
+//         }
         
-    }
-    output[iy * width + ix] = sum/15;
-    
-}
+//     }
+//     output[tid] = temp;
+// }
 
 __global__ void brightnessKernel(unsigned char * input, unsigned char* output, unsigned int height, unsigned int width, int step, int channels, int brightness)
 {
@@ -117,19 +125,11 @@ __global__ void swapPixelKernel(unsigned char * input, unsigned char* output, in
     }
 }
 
-__global__ void sobelKernel(unsigned char * input, unsigned char* output, int width, int height, int step)
+__global__ void convolution2d(unsigned char * input, unsigned char * output, int size, int channel)
 {
-    const int col = blockIdx.x * blockDim.x + threadIdx.x;
-    const int row = blockIdx.y * blockDim.y + threadIdx.y;
+    //2D indexes of current thread
+    const int ix = blockIdx.x * blockDim.x + threadIdx.x;
+    const int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     
-    int start_r = row - 3/2;
-    int start_c = col - 3/2;
-
-
-    if((col < width) && (row < height))
-    {
-
-    }
-
 }

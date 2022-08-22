@@ -4,8 +4,8 @@ int main()
 {
 
     struct Configurations config;
-    //config.imageName = "images/GrassAndSea.jpg";
-    config.imageName = "images/LennaGray.png";
+    config.imageName = "images/GrassAndSea.jpg";
+    //config.imageName = "images/LennaGray.png";
     Engine engine(config);
     
     engine.run();
